@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+@import "tailwindcss";
+
+a.active hr{
+    display: block;
+}
+
+::-webkit-scrollbar{
+    display: none;
+}
+
+@media(max-width:640px){
+    a.active{
+        background-color: black;
+        color: white;
+    }
+}
+
+*{
+    font-family: Outfit,'serif';
+}
