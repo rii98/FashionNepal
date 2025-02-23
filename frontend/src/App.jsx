@@ -14,6 +14,7 @@ import Login from "./pages/Login"
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
+import PaymentStatusPage from "../src/pages/PaymentStatusPage.jsx";
 
 import { ToastContainer } from 'react-toastify';
 
@@ -36,6 +37,7 @@ function App() {
           <Route path='/login' element={<Login/>} />
           <Route path='/place-order' element={<PlaceOrder/>} />
           <Route path='/product/:productId' element={<Product/>} />
+          <Route path="/payment" element={<PaymentStatusPage />} />
         </Routes>
         <Footer/>
       </div>

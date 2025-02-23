@@ -9,7 +9,7 @@ import {useNavigate} from "react-router-dom"
 
 const Cart = () => {
   const { products, cartItems, currency, updateQuantity,getUserCart ,getCartAmount} = useShopStore();
-  const navigate=useNavigate()
+  const navigate = useNavigate()
 
   const [cartData, setCartData] = useState([]);
 
@@ -104,7 +104,8 @@ const Cart = () => {
               }else{
                 navigate('/place-order')
               }
-            } } className= " cursor-pointer bg-black text-white text-sm my-8 px-8 py-3">PROCEED TO CHECKOUT</button>
+            } } className= " cursor-pointer bg-black text-white text-sm my-8 px-8 py-3">PROCEED TO CHECKOUT
+            </button>
           </div>
         </div>
       </div>

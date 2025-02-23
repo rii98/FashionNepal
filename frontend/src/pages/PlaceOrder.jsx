@@ -1,69 +1,76 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react'
+import { Truck } from 'lucide-react';
 import Title from "../components/Title"
 import CartTotal from "../components/CartTotal"
 import { assets } from '../assets/assets'
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify'
 import axios from 'axios'
 import useShopStore from '../store/shopStore'
+import { GenerateSignature } from '../utils/GenerateSignature.js';
+
 
 const PlaceOrder = () => {
-  const {token,cartItems,clearCart,getCartAmount,delivery_fee,products}=useShopStore()
-  const [method,setMethod]=useState("cod")
-  const [data,setData]=useState({
-    firstName:"",
-    lastName:"",
-    email:"",
-    street:'',
-    city:'',
-    state:'',
-    zipcode:'',
-    country:'',
-    phone:'',
+  const { token, cartItems, clearCart, getCartAmount, delivery_fee, products } = useShopStore()
+  const transaction_uuid = Date.now().toString()
+  const baseURL = import.meta.env.VITE_BACKEND_URL
+
+
+  const [method, setMethod] = useState("cod")
+  const [data, setData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    street: '',
+    city: '',
+    state: '',
+    zipcode: '',
+    country: '',
+    phone: '',
   })
   const url = import.meta.env.VITE_BACKEND_URL
 
-  const onChangeHandler=(e)=>{
-    setData((prevData)=>({...prevData,[e.target.name]:e.target.value}))
+  const onChangeHandler = (e) => {
+    setData((prevData) => ({ ...prevData, [e.target.name]: e.target.value }))
   }
 
   const navigate = useNavigate()
 
-  const onSubmitHandler=async(e)=>{
+  const onSubmitHandler = async (e) => {
     e.preventDefault()
     try {
-      let orderItems=[]
-      for(const items in cartItems){
-        for(const item in cartItems[items]){
-          if(cartItems[items][item]>0){
-            const itemInfo=structuredClone(products.find(product=>product._id===items))
-            if(itemInfo){
-              itemInfo.size=item
-              itemInfo.quantity=cartItems[items][item]
+      let orderItems = []
+      for (const items in cartItems) {
+        for (const item in cartItems[items]) {
+          if (cartItems[items][item] > 0) {
+            const itemInfo = structuredClone(products.find(product => product._id === items))
+            if (itemInfo) {
+              itemInfo.size = item
+              itemInfo.quantity = cartItems[items][item]
               orderItems.push(itemInfo)
             }
           }
         }
-      } 
-      let orderData={
-        items:orderItems,
-        address:data,
-        amount:getCartAmount()+delivery_fee
-      }     
+      }
+      let orderData = {
+        items: orderItems,
+        address: data,
+        amount: getCartAmount() + delivery_fee
+      }
       switch (method) {
         case "cod":
-          const response= await axios.post(`${url}/api/order/place`,orderData,{headers:{token}})
-          if(response.data.success){
+          const response = await axios.post(`${url}/api/order/place`, orderData, { headers: { token } })
+          if (response.data.success) {
             clearCart()
             navigate('/orders')
             toast.success(response.data.message)
-          }else{
+          } else {
             toast.error(response.data.message)
           }
           break;
-      
+
         default:
           break;
       }
@@ -72,8 +79,9 @@ const PlaceOrder = () => {
     }
   }
 
+  const totalAmount = getCartAmount() + delivery_fee
   return (
-    <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 min-h-[80vh] border-t '>
+    <div className='flex flex-col sm:flex-row justify-between gap-4 pt-5 min-h-[80vh] border-t '>
       {/* left side */}
       <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
         <div className='text-xl sm:text-2xl my-3'>
@@ -98,30 +106,47 @@ const PlaceOrder = () => {
       {/* Right side */}
       <div className='mt-8'>
         <div className='mt-8 min-w-80'>
-          <CartTotal/>
+          <CartTotal />
         </div>
         <div className='mt-12'>
-          <Title text1={"PAYMENT"} text2={"METHOD"}/>
-          <div  className='flex gap-3 flex-col sm:flex-row'>
-            <div onClick={()=>setMethod("stripe")} className='flex items-center gap-3 border border-gray-300 p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border border-gray-200 rounded-full ${method==="stripe"?'bg-green-500':''}`}></p>
-              <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
+          <Title text1={"PAYMENT"} text2={"METHOD"} />
+          <div className='flex gap-3 flex-col sm:flex-row'>
+            <div className="flex flex-col gap-4 p-4 bg-white rounded-2xl shadow-md">
+              {/* Esewa Payment Button */}
+              <p className='text-sm text-pretty'>For testing Esewa: <br />eSewa ID: 9806800001 Password/MPIN: 1122 Token/OTP:123456</p>
+              <form id="esewaForm" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST">
+                <input type="hidden" name="amount" value={totalAmount} />
+                <input type="hidden" name="tax_amount" value="0" />
+                <input type="hidden" name="total_amount" value={totalAmount} />
+                <input type="hidden" name="transaction_uuid" value={transaction_uuid} />
+                <input type="hidden" name="product_code" value="EPAYTEST" />
+                <input type="hidden" name="product_service_charge" value="0" />
+                <input type="hidden" name="product_delivery_charge" value="0" />
+                <input type="hidden" name="success_url" value={`${baseURL}/api/payment/esewa/success`} />
+                <input type="hidden" name="failure_url" value={`${baseURL}/api/payment/esewa/failure`} />
+                <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code" />
+                <input type="hidden" name="signature" value={GenerateSignature(`total_amount=${totalAmount},transaction_uuid=${transaction_uuid},product_code=EPAYTEST`)} />
+                <button type="submit" className="flex justify-center items-center w-full border-2 border-green-500 rounded-lg transition hover:bg-green-100">
+                  <img src={assets.esewa_logo} alt="eSewa" className="w-20 h-full object-contain" />
+                  <p>Pay with eSewa</p>
+                </button>
+              </form>
+
+
+              {/* Cash on Delivery Button */}
+              <button
+                size="sm"
+                onClick={onSubmitHandler}
+                className="flex items-center justify-center gap-2 bg-gray-800 text-white hover:bg-gray-900 transition rounded-lg py-3"
+              >
+                <Truck className="w-5 h-5" />
+                <span >Cash on Delivery</span>
+              </button>
             </div>
-            <div onClick={()=>setMethod("esewa")} className='flex items-center gap-3 border border-gray-300 p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border border-gray-200 rounded-full ${method==="esewa"?'bg-green-500':''}`}></p>
-              <img className='h-6 mx-4' src={assets.esewa_logo} alt="" />
-            </div>
-            <div onClick={()=>setMethod("cod")} className='flex items-center gap-3 border border-gray-300 p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border border-gray-200 rounded-full ${method==="cod"?'bg-green-500':''}`}></p>
-              <p className='text-gray-500 text-sm font-medium '>Cash on Delivery</p>
-            </div>
-          </div>
-          <div className='w-full text-end mt-8'>
-            <button type='submit'  className='cursor-pointer bg-black text-white text-sm px-16 py-3'>PLACE ORDER</button>
           </div>
         </div>
       </div>
-    </form>
+    </div>
   )
 }
 
