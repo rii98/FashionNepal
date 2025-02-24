@@ -13,7 +13,7 @@ import { GenerateSignature } from '../utils/GenerateSignature.js';
 
 
 const PlaceOrder = () => {
-  const { token, cartItems, clearCart, getCartAmount, delivery_fee, products } = useShopStore()
+  const { token, cartItems, clearCart, getCartAmount, delivery_fee, products } = useShopStore();
   const transaction_uuid = Date.now().toString()
   const baseURL = import.meta.env.VITE_BACKEND_URL
 
@@ -33,7 +33,8 @@ const PlaceOrder = () => {
   const url = import.meta.env.VITE_BACKEND_URL
 
   const onChangeHandler = (e) => {
-    setData((prevData) => ({ ...prevData, [e.target.name]: e.target.value }))
+    setData((prevData) => ({ ...prevData, [e.target.name]: e.target.value }));
+    localStorage.setItem('orderAddress', JSON.stringify(data));
   }
 
   const navigate = useNavigate()

@@ -6,6 +6,7 @@ import axios from "axios";
 
 
 const shopStore = (set, get) => ({
+   
     currency: "Rs.",
     delivery_fee: 40,
     url: import.meta.env.VITE_BACKEND_URL,
@@ -18,6 +19,7 @@ const shopStore = (set, get) => ({
     clearCart:()=>set({cartItems:{}}),
     token:"",
     setToken:(tokenVal)=>set({token:tokenVal}),
+    
 
     addToCart: async (itemId, size) => {
         const cartData = structuredClone(get().cartItems || {});

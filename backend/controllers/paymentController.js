@@ -4,6 +4,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 export const esewaSuccess = async(req,res) =>{
     try {
+
+        
         // Decode the Base64 response body from eSewa
         const base64Response = req.query.data; // eSewa sends a base64-encoded response
         const decodedResponse = Buffer.from(base64Response, "base64").toString("utf-8");

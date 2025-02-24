@@ -29,7 +29,27 @@ const placeOrderStripe = async(req,res)=>{
 }
 
 //place order using esewa
-const placeOrderEsewa = async(req,res)=>{}
+const placeOrderEsewa = async(req,res)=>{
+    console.log("inside placeorderesewa controller")
+    try {
+        const {userId,amount,address,items}=req.body
+        const orderData={
+         userId:userId,
+         amount:amount,
+         address:address,
+         items:items,
+         paymentMethod:"esewa",
+         payment:true,
+         date:Date.now()
+        }
+        const newOrder= new Order(orderData)
+        await newOrder.save()
+        await User.findByIdAndUpdate(userId,{cartData:{}})
+        res.json({success:true,message:"Order Placed Successfully"})
+     } catch (error) {
+         res.json({success:false,message:error.message})
+     }
+}
 
 //display orders for admin
 const displayAllOrders = async(req,res)=>{
